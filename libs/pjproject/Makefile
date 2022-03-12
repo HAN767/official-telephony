@@ -10,14 +10,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pjproject
-PKG_VERSION:=2.9
-PKG_RELEASE:=3
+PKG_VERSION:=2.10
+PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE:=pjproject-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=https://www.pjsip.org/release/$(PKG_VERSION)
-PKG_HASH:=d185ef7855c8ec07191dde92f54b65a7a4b7a6f7bf8c46f7af35ceeb1da2a636
+# download "vX.Y.tar.gz" as "pjproject-vX.Y.tar.gz"
+PKG_SOURCE_URL_FILE:=$(PKG_VERSION).tar.gz
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_URL_FILE)
+PKG_SOURCE_URL:=https://github.com/pjsip/$(PKG_NAME)/archive
+PKG_HASH:=936a4c5b98601b52325463a397ddf11ab4106c6a7b04f8dc7cdd377efbb597de
 PKG_INSTALL:=1
-PKG_FIXUP:=autoreconf
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=COPYING
@@ -27,7 +28,6 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:=CONFIG_SOFT_FLOAT
 
-include $(INCLUDE_DIR)/uclibc++.mk
 include $(INCLUDE_DIR)/package.mk
 
 define Package/pjproject/Default
@@ -35,7 +35,7 @@ define Package/pjproject/Default
   CATEGORY:=Libraries
   SUBMENU:=Telephony
   URL:=https://www.pjsip.org
-  DEPENDS:=$(CXX_DEPENDS) +libopenssl +libuuid +libpthread
+  DEPENDS:=+libstdcpp +libopenssl +libuuid +libpthread
 endef
 
 define Package/pjproject/install/lib
@@ -93,6 +93,7 @@ CONFIGURE_ARGS+= \
 TARGET_CFLAGS+=$(TARGET_CPPFLAGS)
 
 define Build/Compile
+	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) dep
 	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)
 endef
 
